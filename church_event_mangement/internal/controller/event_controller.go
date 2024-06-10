@@ -17,9 +17,9 @@ func NewEventController(service service.EventService) *EventController {
 	return &EventController{service}
 }
 
-func (c *EventController) RegisterRoutes(router *gin.Engine) {
-	router.POST("/api/events", c.CreateEvent)
-	router.GET("/api/events/:id", c.GetEvent)
+func (c *EventController) RegisterRoutes(router *gin.RouterGroup) {
+	router.POST("/events", c.CreateEvent)
+	router.GET("/events/:id", c.GetEvent)
 }
 
 func (c *EventController) CreateEvent(ctx *gin.Context) {
