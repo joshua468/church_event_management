@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 	"strings"
 
@@ -11,6 +12,8 @@ import (
 func JWTAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
+		log.Println("Authorization header:", authHeader) // Log the header
+
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
 			c.Abort()
@@ -18,6 +21,8 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		}
 
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		log.Println("Token string after trimming prefix:", tokenString) // Log the token
+
 		if tokenString == authHeader {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization header format"})
 			c.Abort()
@@ -26,11 +31,13 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 
 		claims, err := util.ValidateToken(tokenString)
 		if err != nil {
+			log.Println("Token validation error:", err) // Log validation error
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			c.Abort()
 			return
 		}
 
+		log.Println("Token claims:", claims) // Log the claims
 		c.Set("user", claims)
 		c.Next()
 	}
