@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/joshua468/church_event_management/config"
 	"github.com/joshua468/church_event_management/db"
@@ -43,12 +44,13 @@ func main() {
 	// Setup Gin router
 	router := gin.Default()
 
-	// JWT Middleware
-	router.Use(middleware.JWTAuthMiddleware())
-
-	// Register routes
+	// Public routes
 	userController.RegisterRoutes(router)
-	eventController.RegisterRoutes(router)
+
+	// Protected routes
+	protected := router.Group("/api")
+	protected.Use(middleware.JWTAuthMiddleware())
+	eventController.RegisterRoutes(protected)
 
 	// Start the server
 	router.Run(":8080")
