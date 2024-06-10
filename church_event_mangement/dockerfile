@@ -1,0 +1,39 @@
+# Use an official Ubuntu as a parent image
+FROM ubuntu:20.04
+
+# Install any needed packages specified in apt-get
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    gcc \
+    git \
+    make
+
+# Install Go
+RUN curl -OL https://golang.org/dl/go1.18.linux-amd64.tar.gz && \
+    tar -C /usr/local -xvf go1.18.linux-amd64.tar.gz && \
+    rm go1.18.linux-amd64.tar.gz
+
+# Add Go to PATH
+ENV PATH="/usr/local/go/bin:${PATH}"
+
+# Copy the Go modules files
+COPY go.mod go.sum ./
+
+# Download the Go modules
+RUN go mod download
+
+# Copy the rest of the application code
+COPY . .
+
+# Copy wait-for-it.sh script
+COPY wait-for-it.sh .
+
+# Ensure the wait-for-it.sh script has execute permissions
+RUN chmod +x wait-for-it.sh
+
+# Build the Go app
+RUN go build -o main ./cmd
+
+# Run the executable
+CMD ["./wait-for-it.sh", "db:3306", "--", "./main"]

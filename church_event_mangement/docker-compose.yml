@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: church_event_mangement-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: church_event_management
+      MYSQL_USER: joshua468
+      MYSQL_PASSWORD: Temitope2080
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  cmd:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: church_event_mangement-cmd
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: joshua468
+      DB_PASSWORD: Temitope2080
+      DB_NAME: church_event_management
+    command: ["./wait-for-it.sh", "db:3306", "--", "./main"]
+
+volumes:
+  db-data:
